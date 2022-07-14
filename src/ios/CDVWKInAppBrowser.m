@@ -507,6 +507,17 @@ static CDVWKInAppBrowser* instance = nil;
     NSString* httpMethod = navigationAction.request.HTTPMethod;
     NSString* errorMessage = nil;
     
+    //rewrite beforeload event, such as: beforeload=wxpay beforeload=alipay
+     NSLog(@"url = %@",url.absoluteString);
+     if([url.absoluteString hasPrefix:_beforeload]){
+         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                                       messageAsDictionary:@{@"type":@"beforeload", @"url":[url absoluteString]}];
+         [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
+         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
+         decisionHandler(WKNavigationActionPolicyCancel);
+         return;
+    }
+    
     if([_beforeload isEqualToString:@"post"]){
         //TODO handle POST requests by preserving POST data then remove this condition
         errorMessage = @"beforeload doesn't yet support POST requests";
